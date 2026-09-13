@@ -87,7 +87,20 @@
 
         // ============ КНОПКА 2: ADSGRAM ============
         const watchAdsgramBtn = document.getElementById('watchAdsgramBtn');
-        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "int-47785" }) : null;
+
+        let AdController = null;
+        if (window.Adsgram) {
+            try {
+                AdController = window.Adsgram.init({ blockId: "int-47785" });
+            } catch (e) {
+                console.log('Format 1 (int-47785) failed, trying format 2...');
+                try {
+                    AdController = window.Adsgram.init({ blockId: "47785" });
+                } catch (e2) {
+                    console.error('Both formats failed:', e2);
+                }
+            }
+        }
 
         watchAdsgramBtn.addEventListener('click', () => {
             if (!AdController) {
