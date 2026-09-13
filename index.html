@@ -7,8 +7,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Taddy SDK -->
     <script src="https://sdk.taddy.pro/web/taddy.min.js?1317" data-pub-id="ebfc11641be2dcc4d9f236bbd41b89f3"></script>
-    <!-- Monetag SDK добавим позже, когда получим Zone ID -->
-    <!-- <script src="https://...monetag..." data-zone="XXXXXX"></script> -->
+    <!-- AdsGram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -19,43 +19,20 @@
         }
         h1 { margin-bottom: 8px; font-size: 32px; }
         p { color: #888; margin-bottom: 30px; font-size: 15px; }
-        .ad-block {
-            width: 100%;
-            max-width: 320px;
-            margin-bottom: 16px;
-        }
+        .ad-block { width: 100%; max-width: 320px; margin-bottom: 16px; }
         .ad-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 12px; color: #666; margin-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 1px;
         }
         .watch-btn {
-            width: 100%;
-            padding: 18px 24px;
-            font-size: 17px;
-            font-weight: bold;
-            border-radius: 14px;
-            border: none;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-            transition: transform 0.1s;
+            width: 100%; padding: 18px 24px; font-size: 17px; font-weight: bold;
+            border-radius: 14px; border: none; color: white; cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); transition: transform 0.1s;
         }
         .watch-btn:active { transform: scale(0.97); }
         .watch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* Кнопка Taddy — синяя */
-        .btn-taddy {
-            background: linear-gradient(135deg, #2481cc, #1a5f9e);
-        }
-
-        /* Кнопка Monetag — зелёная */
-        .btn-monetag {
-            background: linear-gradient(135deg, #4caf50, #2e7d32);
-        }
-
+        .btn-taddy { background: linear-gradient(135deg, #2481cc, #1a5f9e); }
+        .btn-adsgram { background: linear-gradient(135deg, #ff6b35, #d84315); }
         #status { margin-top: 20px; font-size: 14px; color: #888; min-height: 20px; }
     </style>
 </head>
@@ -63,16 +40,14 @@
     <h1>💰 Ruble-Easy</h1>
     <p>Смотри рекламу и зарабатывай монеты</p>
 
-    <!-- Блок 1: Taddy -->
     <div class="ad-block">
         <div class="ad-label">Реклама 1</div>
         <button class="watch-btn btn-taddy" id="watchTaddyBtn">▶️ Смотреть рекламу</button>
     </div>
 
-    <!-- Блок 2: Monetag -->
     <div class="ad-block">
         <div class="ad-label">Реклама 2</div>
-        <button class="watch-btn btn-monetag" id="watchMonetagBtn">▶️ Смотреть рекламу</button>
+        <button class="watch-btn btn-adsgram" id="watchAdsgramBtn">▶️ Смотреть рекламу</button>
     </div>
 
     <div id="status"></div>
@@ -92,52 +67,51 @@
         watchTaddyBtn.addEventListener('click', () => {
             watchTaddyBtn.disabled = true;
             statusEl.textContent = 'Загрузка рекламы Taddy...';
-
             const ads = taddy.ads();
             ads.interstitial({
                 onClosed: () => console.log('Taddy ad closed'),
                 onViewThrough: (id) => {
-                    console.log('Taddy ad viewed! ID:', id);
                     statusEl.textContent = '✅ Награда начисляется...';
                     setTimeout(() => tg.close(), 1200);
                 }
             }).then((success) => {
-                if (success) {
-                    console.log('Taddy ad shown');
-                } else {
-                    statusEl.textContent = '❌ Реклама недоступна. Попробуйте позже.';
+                if (!success) {
+                    statusEl.textContent = '❌ Реклама недоступна.';
                     watchTaddyBtn.disabled = false;
                 }
-            }).catch((err) => {
-                console.error('Taddy ad error:', err);
-                statusEl.textContent = '❌ Ошибка загрузки рекламы Taddy.';
+            }).catch(() => {
+                statusEl.textContent = '❌ Ошибка рекламы Taddy.';
                 watchTaddyBtn.disabled = false;
             });
         });
 
-        // ============ КНОПКА 2: MONETAG (заглушка) ============
-        // Когда зарегистрируетесь в Monetag и получите Zone ID —
-        // замените этот блок на реальный вызов.
-        const watchMonetagBtn = document.getElementById('watchMonetagBtn');
-        watchMonetagBtn.addEventListener('click', () => {
-            // ПОКА ЗАГЛУШКА — покажем сообщение
-            statusEl.textContent = '⏳ Вторая сеть скоро будет подключена. Используйте первую кнопку.';
-            setTimeout(() => statusEl.textContent = '', 4000);
+        // ============ КНОПКА 2: ADSGRAM ============
+        const watchAdsgramBtn = document.getElementById('watchAdsgramBtn');
+        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "int-47785" }) : null;
 
-            /* РАСКОММЕНТИРОВАТЬ ПОСЛЕ РЕГИСТРАЦИИ В MONETAG:
+        watchAdsgramBtn.addEventListener('click', () => {
+            if (!AdController) {
+                statusEl.textContent = '❌ AdsGram не загружен.';
+                return;
+            }
 
-            watchMonetagBtn.disabled = true;
-            statusEl.textContent = 'Загрузка рекламы Monetag...';
+            watchAdsgramBtn.disabled = true;
+            statusEl.textContent = 'Загрузка рекламы AdsGram...';
 
-            show_XXXXXX().then(() => {
-                console.log('Monetag ad viewed');
-                statusEl.textContent = '✅ Награда начисляется...';
-                setTimeout(() => tg.close(), 1200);
-            }).catch(() => {
+            AdController.show().then((result) => {
+                if (result.done) {
+                    console.log('AdsGram ad viewed!');
+                    statusEl.textContent = '✅ Награда начисляется...';
+                    setTimeout(() => tg.close(), 1200);
+                } else {
+                    statusEl.textContent = '❌ Реклама не просмотрена до конца.';
+                    watchAdsgramBtn.disabled = false;
+                }
+            }).catch((err) => {
+                console.error('AdsGram error:', err);
                 statusEl.textContent = '❌ Реклама недоступна. Попробуйте позже.';
-                watchMonetagBtn.disabled = false;
+                watchAdsgramBtn.disabled = false;
             });
-            */
         });
     </script>
 </body>
