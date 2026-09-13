@@ -86,20 +86,13 @@
         });
 
         // ============ КНОПКА 2: ADSGRAM ============
+        // ============ КНОПКА 2: ADSGRAM ============
         const watchAdsgramBtn = document.getElementById('watchAdsgramBtn');
 
+        // Используем ТОЛЬКО числовой Block ID (без "int-")
         let AdController = null;
         if (window.Adsgram) {
-            try {
-                AdController = window.Adsgram.init({ blockId: "int-47785" });
-            } catch (e) {
-                console.log('Format 1 (int-47785) failed, trying format 2...');
-                try {
-                    AdController = window.Adsgram.init({ blockId: "47785" });
-                } catch (e2) {
-                    console.error('Both formats failed:', e2);
-                }
-            }
+            AdController = window.Adsgram.init({ blockId: "47785" });
         }
 
         watchAdsgramBtn.addEventListener('click', () => {
@@ -117,7 +110,7 @@
                     statusEl.textContent = '✅ Награда начисляется...';
                     setTimeout(() => tg.close(), 1200);
                 } else {
-                    statusEl.textContent = '❌ Реклама не просмотрена до конца.';
+                    statusEl.textContent = '❌ Реклама не просмотрена.';
                     watchAdsgramBtn.disabled = false;
                 }
             }).catch((err) => {
